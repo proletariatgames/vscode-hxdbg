@@ -1,0 +1,10 @@
+-cp src
+-lib vscode-debugadapter:git:https://github.com/vshaxe/vscode-debugadapter-extern.git#2aeeae0450d7403df0af09c94b28096db0a45c40
+-lib vshaxe
+-lib hxnodejs
+-js bin/hxdbg-adapter.js
+-main HxDebug
+-debug
+-cp debugAdapter
+-D js-es=6
+-D js_enums_as_arrays

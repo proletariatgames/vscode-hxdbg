@@ -1,0 +1,910 @@
+{
+  "name": "hxdbg",
+  "displayName": "Haxe Debuggers",
+  "description": "Haxe debug wrappers",
+  "publisher": "proletariatgames",
+  "version": "0.0.1",
+  "author": {
+    "name": "Proletariat Games"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.32.0"
+  },
+  "bugs": {
+    "url": "https://github.com/proletariatgames/vscode-hxdbg/issues",
+    "email": "hi-eng@proletariat.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/proletariatgames/vscode-hxdbg.git"
+  },
+  "homepage": "https://github.com/proletariatgames/vscode-hxdbg",
+  "qna": "https://github.com/Microsoft/proletariatgames/vscode-hxdbg/issues",
+  "keywords": [
+    "Haxe",
+    "Debugging"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Debuggers"
+  ],
+  "activationEvents": [
+    "onLanguage:haxe",
+    "onDebug"
+  ],
+  "// extension depdency versions": {
+    "ms-vscode.cpptools": "0.24.0"
+  },
+  "dependencies": {
+    "vscode-debugadapter": "1.35.0",
+    "vscode-debugprotocol": "1.35.0"
+  },
+  "extensionDependencies": [
+    "ms-vscode.cpptools",
+    "nadako.vshaxe"
+  ],
+  "main": "./bin/hxdbg",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "hxdbg",
+      "properties": {
+        "hxdbg.cppdbg.debuggerPath": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified. ${cpptools} can be used as a standin for cpptools' path",
+          "default": null
+        },
+        "hxdbg.cppvsdbg.debuggerPath": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified. ${cpptools} can be used as a standin for cpptools' path",
+          "default": null
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "hxdbg.enableLiveReload",
+        "title": "hxdbg: Enable live reload"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "hxcppdbg",
+        "label": "HXCPP (GDB/LLDB)",
+        "enableBreakpointsFor": {
+          "languageIds": [
+            "c",
+            "cpp",
+            "haxe"
+          ]
+        },
+        "program": "./bin/hxdbg-adapter.js",
+        "runtime": "node",
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+        "variables": {
+          "pickProcess": "extension.pickNativeProcess",
+          "pickRemoteProcess": "extension.pickRemoteNativeProcess"
+        },
+        "configurationAttributes": {
+          "launch": {
+            "type": "object",
+            "default": {},
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "hx_nativeLevel": {
+                "type": "number",
+                "description": "A number that represents how much of the native code can be debugged. 1000 is the default and should not show any haxe implementation details, while 0 will show just the C++ generated code. This can be changed at runtime. See readme for more details",
+                "default": 1000
+              },
+              "hx_debuggerPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified",
+                "default": null
+              },
+              "hx_classPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The Haxe classpaths defined that produced this executable. This can be automatically determined if the executable was compiled with the hxdbg library",
+                "default": null
+              },
+              "hx_haxeConfiguration": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The command-line arguments used to provide completion to the build. If not set, the `haxe.configurations` config will be used instead",
+                "default": null
+              },
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/a.out"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command line arguments passed to the program.",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppdbg\".",
+                "default": "cppdbg"
+              },
+              "targetArchitecture": {
+                "type": "string",
+                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "default": "x64"
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory of the target",
+                "default": "."
+              },
+              "setupCommands": {
+                "type": "array",
+                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": false
+                    }
+                  }
+                },
+                "default": []
+              },
+              "customLaunchSetupCommands": {
+                "type": "array",
+                "description": "If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be \"-target-attach\" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: \"customLaunchSetupCommands\": [ { \"text\": \"target-run\", \"description\": \"run target\", \"ignoreFailures\": false }].",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": false
+                    }
+                  }
+                },
+                "default": []
+              },
+              "launchCompleteCommand": {
+                "enum": [
+                  "exec-run",
+                  "exec-continue",
+                  "None"
+                ],
+                "description": "The command to execute after the debugger is fully setup in order to cause the target process to run. Allowed values are \"exec-run\", \"exec-continue\", \"None\". The default value is \"exec-run\".",
+                "default": "exec-run"
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "default": ""
+              },
+              "showDisplayString": {
+                "type": "boolean",
+                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "default": true
+              },
+              "environment": {
+                "type": "array",
+                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "default": []
+              },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "default": "${workspaceFolder}/.env"
+              },
+              "additionalSOLibSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "MIMode": {
+                "type": "string",
+                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "default": "gdb"
+              },
+              "miDebuggerPath": {
+                "type": "string",
+                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "default": "/usr/bin/gdb"
+              },
+              "miDebuggerArgs": {
+                "type": "string",
+                "description": "Arguments for the mi debugger (such as gdb) to use. When unspecified.",
+                "default": ""
+              },
+              "miDebuggerServerAddress": {
+                "type": "string",
+                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "default": "serveraddress:port"
+              },
+              "stopAtEntry": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "default": false
+              },
+              "debugServerPath": {
+                "type": "string",
+                "description": "Optional full path to debug server to launch. Defaults to null.",
+                "default": ""
+              },
+              "debugServerArgs": {
+                "type": "string",
+                "description": "Optional debug server args. Defaults to null.",
+                "default": ""
+              },
+              "serverStarted": {
+                "type": "string",
+                "description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
+                "default": ""
+              },
+              "filterStdout": {
+                "type": "boolean",
+                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "default": true
+              },
+              "filterStderr": {
+                "type": "boolean",
+                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "default": false
+              },
+              "serverLaunchTimeout": {
+                "type": "integer",
+                "description": "Optional time, in milliseconds, for the debugger to wait for the debugServer to start up. Default is 10000.",
+                "default": "10000"
+              },
+              "coreDumpPath": {
+                "type": "string",
+                "description": "Optional full path to a core dump file for the specified program. Defaults to null.",
+                "default": ""
+              },
+              "externalConsole": {
+                "type": "boolean",
+                "description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
+                "default": false
+              },
+              "avoidWindowsConsoleRedirection": {
+                "type": "boolean",
+                "description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
+                "default": false
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "traceResponse": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              },
+              "pipeTransport": {
+                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "type": "object",
+                "default": {
+                  "pipeCwd": "/usr/bin",
+                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeArgs": [],
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                },
+                "properties": {
+                  "pipeCwd": {
+                    "type": "string",
+                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "default": "/usr/bin"
+                  },
+                  "pipeProgram": {
+                    "type": "string",
+                    "description": "The fully qualified pipe command to execute.",
+                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                  },
+                  "pipeArgs": {
+                    "type": "array",
+                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "debuggerPath": {
+                    "type": "string",
+                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
+                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  },
+                  "pipeEnv": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Environment variables passed to the pipe program.",
+                    "default": {}
+                  }
+                }
+              }
+            }
+          },
+          "attach": {
+            "type": "object",
+            "default": {},
+            "required": [
+              "program",
+              "processId"
+            ],
+            "properties": {
+              "hx_nativeLevel": {
+                "type": "number",
+                "description": "A number that represents how much of the native code can be debugged. 1000 is the default and should not show any haxe implementation details, while 0 will show just the C++ generated code. This can be changed at runtime. See readme for more details",
+                "default": 1000
+              },
+              "hx_debuggerPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified",
+                "default": null
+              },
+              "hx_classPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The Haxe classpaths defined that produced this executable. This can be automatically determined if the executable was compiled with the hxdbg library",
+                "default": null
+              },
+              "hx_haxeConfiguration": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The command-line arguments used to provide completion to the build. If not set, the `haxe.configurations` config will be used instead",
+                "default": null
+              },
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/a.out"
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppdbg\".",
+                "default": "cppdbg"
+              },
+              "targetArchitecture": {
+                "type": "string",
+                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "default": "x64"
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "default": ""
+              },
+              "showDisplayString": {
+                "type": "boolean",
+                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "default": true
+              },
+              "additionalSOLibSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "MIMode": {
+                "type": "string",
+                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "default": "gdb"
+              },
+              "miDebuggerPath": {
+                "type": "string",
+                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "default": "/usr/bin/gdb"
+              },
+              "miDebuggerServerAddress": {
+                "type": "string",
+                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "default": "serveraddress:port"
+              },
+              "processId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": "${command:pickProcess}"
+                  },
+                  {
+                    "type": "integer",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": 0
+                  }
+                ]
+              },
+              "filterStdout": {
+                "type": "boolean",
+                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "default": true
+              },
+              "filterStderr": {
+                "type": "boolean",
+                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "default": false
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "traceResponse": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              },
+              "pipeTransport": {
+                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "type": "object",
+                "default": {
+                  "pipeCwd": "/usr/bin",
+                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeArgs": [],
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                },
+                "properties": {
+                  "pipeCwd": {
+                    "type": "string",
+                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "default": "/usr/bin"
+                  },
+                  "pipeProgram": {
+                    "type": "string",
+                    "description": "The fully qualified pipe command to execute.",
+                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                  },
+                  "pipeArgs": {
+                    "type": "array",
+                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "debuggerPath": {
+                    "type": "string",
+                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
+                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  },
+                  "pipeEnv": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Environment variables passed to the pipe program.",
+                    "default": {}
+                  }
+                }
+              },
+              "setupCommands": {
+                "type": "array",
+                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": false
+                    }
+                  }
+                },
+                "default": []
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "hxcppvsdbg",
+        "label": "HXCPP (Windows)",
+        "enableBreakpointsFor": {
+          "languageIds": [
+            "c",
+            "cpp",
+            "haxe"
+          ]
+        },
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+        "program": "./bin/hxdbg-adapter.js",
+        "runtime": "node",
+        "variables": {
+          "pickProcess": "extension.pickNativeProcess"
+        },
+        "configurationAttributes": {
+          "launch": {
+            "type": "object",
+            "default": {},
+            "required": [
+              "program",
+              "cwd"
+            ],
+            "properties": {
+              "hx_nativeLevel": {
+                "type": "number",
+                "description": "A number that represents how much of the native code can be debugged. 1000 is the default and should not show any haxe implementation details, while 0 will show just the C++ generated code. This can be changed at runtime. See readme for more details",
+                "default": 1000
+              },
+              "hx_debuggerPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified",
+                "default": null
+              },
+              "hx_classPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The Haxe classpaths defined that produced this executable. This can be automatically determined if the executable was compiled with the hxdbg library",
+                "default": null
+              },
+              "hx_haxeConfiguration": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The command-line arguments used to provide completion to the build. If not set, the `haxe.configurations` config will be used instead",
+                "default": null
+              },
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/program.exe"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command line arguments passed to the program.",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "default": "cppvsdbg"
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory of the target.",
+                "default": "${workspaceRoot}"
+              },
+              "environment": {
+                "type": "array",
+                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "default": []
+              },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "default": "${workspaceFolder}/.env"
+              },
+              "symbolSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "stopAtEntry": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "default": false
+              },
+              "dumpPath": {
+                "type": "string",
+                "description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
+                "default": ""
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process.",
+                "default": ""
+              },
+              "externalConsole": {
+                "type": "boolean",
+                "description": "If true, a console is launched for the debuggee. If false, no console is launched.",
+                "default": false
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "enableDebugHeap": {
+                "type": "boolean",
+                "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+                "default": false
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              }
+            }
+          },
+          "attach": {
+            "type": "object",
+            "default": {},
+            "required": [
+              "processId"
+            ],
+            "properties": {
+              "hx_nativeLevel": {
+                "type": "number",
+                "description": "A number that represents how much of the native code can be debugged. 1000 is the default and should not show any haxe implementation details, while 0 will show just the C++ generated code. This can be changed at runtime. See readme for more details",
+                "default": 1000
+              },
+              "hx_debuggerPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "An override to the path and arguments to the wrapped debugger. Will be determined automatically if unspecified",
+                "default": null
+              },
+              "hx_classPath": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The Haxe classpaths defined that produced this executable. This can be automatically determined if the executable was compiled with the hxdbg library",
+                "default": null
+              },
+              "hx_haxeConfiguration": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "The command-line arguments used to provide completion to the build. If not set, the `haxe.configurations` config will be used instead",
+                "default": null
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "default": "cppvsdbg"
+              },
+              "symbolSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "processId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": "${command:pickProcess}"
+                  },
+                  {
+                    "type": "integer",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": 0
+                  }
+                ]
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process.",
+                "default": ""
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
