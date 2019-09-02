@@ -27,7 +27,7 @@ class Log
       data.replace('\n', '\n\t');
       data += '\n';
       switch (str) {
-        case 'Error' | 'Warning':
+        case 'Error' | 'Warning' | 'Failure':
           HxDebug.instance.sendEvent(new adapter.DebugSession.OutputEvent(data, stderr));
         case _:
           // this.sendEvent(new adapter.DebugSession.OutputEvent(prefix + str + extra + '\n'));
@@ -36,6 +36,10 @@ class Log
       if (logFile != null)
       {
         logFile.write(data);
+      }
+      if (str == 'Failure')
+      {
+        throw data;
       }
     };
   }
@@ -96,5 +100,10 @@ class Log
   macro public static function err(args:Array<Expr>)
   {
     return makeLog(macro hxdbg.LogVerbosity.Error, args);
+  }
+
+  macro public static function fail(args:Array<Expr>)
+  {
+    return makeLog(macro hxdbg.LogVerbosity.Failure, args);
   }
 }

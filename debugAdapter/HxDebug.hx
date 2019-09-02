@@ -9,7 +9,7 @@ using StringTools;
 class HxDebug extends hxdbg.ProtocolHandler
 {
   public final wrapped:hxdbg.WrappedCommand;
-  public var config(default, null):Null<HxDebugConfig>;
+  public final ctx:hxdbg.Context;
 
   function disconnectRequest(req:Request<DisconnectArguments>)
   {
@@ -20,6 +20,7 @@ class HxDebug extends hxdbg.ProtocolHandler
 
   function launchOrAttachRequest(req:Request<HxDebugConfig>)
   {
+    this.ctx.setConfig(req.arguments);
     this.wrapped.sendRequest(req.command, req.arguments, (resp:Response<{}>) -> {
       sendResponse(req, resp);
     });
@@ -47,6 +48,7 @@ class HxDebug extends hxdbg.ProtocolHandler
 
   function setBreakpoints(req:SetBreakpointsRequest)
   {
+    trace(req);
     if (req.arguments.source.path != null && req.arguments.source.path.toLowerCase().endsWith('.hx'))
     {
       Log.warn('// TODO haxe breakpoints');
@@ -73,6 +75,7 @@ class HxDebug extends hxdbg.ProtocolHandler
 
     trace(Sys.args());
     this.wrapped = new hxdbg.WrappedCommand(Sys.args().copy());
+    this.ctx = new hxdbg.Context(this.wrapped);
     this.wrapped.process.on(WrappedEvent.Error, (err:js.lib.Error) -> {
       Log.err('error on wrapped $err');
       sendEvent(new adapter.DebugSession.OutputEvent('Error while opening the wrapped process: $err', stderr));

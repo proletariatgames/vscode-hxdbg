@@ -8,6 +8,7 @@ enum abstract LogVerbosity(String) from String
   var Log = "Log";
   var Warning = "Warning";
   var Error = "Error";
+  var Failure = "Failure";
 
   @:op(A >= B) public function isAsVerbose(asVerbosity:LogVerbosity):Bool
   {
@@ -37,6 +38,7 @@ enum abstract LogVerbosity(String) from String
       case Log: 3;
       case Warning: 4;
       case Error: 5;
+      case Failure: 6;
       case _: -1;
     }
   }

@@ -6,7 +6,6 @@ import js.node.Buffer;
 import js.node.stream.Writable.IWritable;
 import js.node.stream.Readable.ReadableEvent;
 import js.node.stream.Readable.IReadable;
-using StringTools;
 
 class ProtocolHandler
 {
